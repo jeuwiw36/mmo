@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiển thị Key từ URL - Modern UI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --success-color: #10b981;
+            --border-color: #334155;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 440px;
+            width: 90%;
+            box-sizing: border-box;
+        }
+
+        .icon-container {
+            font-size: 32px;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 0 0 8px 0;
+        }
+
+        p.subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .result-wrapper {
+            display: flex;
+            align-items: center;
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 6px 6px 6px 14px;
+            gap: 10px;
+            transition: border-color 0.2s;
+        }
+
+        .result-wrapper:focus-within {
+            border-color: var(--accent-color);
+        }
+
+        .result-box {
+            flex-grow: 1;
+            font-size: 15px;
+            color: #60a5fa;
+            word-break: break-all;
+            font-family: monospace;
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .copy-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .copy-btn:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+
+        .copy-btn.copied {
+            background-color: var(--success-color);
+        }
+
+        .error-text {
+            color: #f87171 !important;
+            white-space: normal !important;
+            font-family: inherit !important;
+            font-size: 14px !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="icon-container">
+            <i class="fa-solid fa-key"></i>
+        </div>
+        <h2>Khóa Xác Thực (Key)</h2>
+        <p class="subtitle">Giá trị key được lấy trực tiếp từ tham số trên URL</p>
+        
+        <div class="result-wrapper">
+            <div class="result-box" id="keyValue">Đang tải...</div>
+            <button class="copy-btn" id="copyBtn" onclick="copyKey()" disabled>
+                <i class="fa-regular fa-copy"></i> Sao chép
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Lấy giá trị tham số 'key' từ URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const keyValue = urlParams.get('key');
+
+        const resultBox = document.getElementById('keyValue');
+        const copyBtn = document.getElementById('copyBtn');
+
+        if (keyValue) {
+            resultBox.textContent = keyValue;
+            copyBtn.disabled = false; // Bật nút sao chép khi có key hợp lệ
+        } else {
+            resultBox.textContent = 'Không tìm thấy tham số "key" trong URL!';
+            resultBox.className = 'result-box error-text';
+            copyBtn.style.display = 'none'; // Ẩn nút sao chép nếu không có key
+        }
+
+        // Hàm xử lý sao chép với hiệu ứng chuyển đổi trạng thái
+        function copyKey() {
+            if (!keyValue) return;
+
+            navigator.clipboard.writeText(keyValue).then(() => {
+                // Đổi trạng thái nút thành "Đã sao chép"
+                copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Đã chép';
+                copyBtn.classList.add('copied');
+
+                // Khôi phục lại trạng thái ban đầu sau 2 giây
+                setTimeout(() => {
+                    copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> Sao chép';
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                alert('Không thể sao chép. Vui lòng thủ công!');
+                console.error(err);
+            });
+        }
+    </script>
+
+</body>
+</html>
