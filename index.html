@@ -26,14 +26,16 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
   </main>
   <script>
     (() => {
-      const key = new URLSearchParams(location.search).get('key');
+      // Lấy nguyên giá trị key từ URL (không decode để giữ nguyên ký tự đặc biệt)
+      const rawKey = new URLSearchParams(location.search).get('key');
+
       const keyEl = document.getElementById('keyValue'),
             copyBtn = document.getElementById('copyBtn'),
             shareBtn = document.getElementById('shareBtn'),
             status = document.getElementById('status');
 
-      // ✅ FIX: cho phép key dài 4–32 ký tự (trước đây chỉ đúng 5 ký tự)
-      const valid = /^[a-zA-Z0-9]{4,32}$/.test(key || '');
+      // ✅ Hiển thị MỌI nội dung của ?key=... miễn là có ít nhất 1 ký tự
+      const valid = typeof rawKey === 'string' && rawKey.length > 0;
 
       if (!valid) {
         keyEl.textContent = 'Không tìm thấy key hợp lệ';
@@ -43,17 +45,18 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
         return;
       }
 
-      keyEl.textContent = key;
-      keyEl.style.color = 'var(--cyan)'; // ✅ reset màu về bình thường khi key hợp lệ
+      // Hiển thị y nguyên nội dung key (đã được trình duyệt tự decode)
+      keyEl.textContent = rawKey;
+      keyEl.style.color = 'var(--cyan)';
       copyBtn.disabled = false;
 
       async function copy() {
         try {
-          await navigator.clipboard.writeText(key);
+          await navigator.clipboard.writeText(rawKey);
           copyBtn.classList.add('success');
           copyBtn.querySelector('span').textContent = 'Đã sao chép';
           status.textContent = 'Key đã được sao chép vào clipboard.';
-          status.className = 'status'; // ✅ reset trạng thái lỗi
+          status.className = 'status';
           setTimeout(() => {
             copyBtn.classList.remove('success');
             copyBtn.querySelector('span').textContent = 'Sao chép';
@@ -68,11 +71,12 @@ body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relati
 
       shareBtn.addEventListener('click', async () => {
         try {
-          await navigator.share({ title: 'Redeem key', text: `Key của tôi: ${key}`, url: location.href });
+          await navigator.share({ title: 'Redeem key', text: `Key của tôi: ${rawKey}`, url: location.href });
         } catch {
           await copy();
         }
       });
     })();
   </script>
+
 </body></html>
